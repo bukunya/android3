@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F3FF"
+    android:padding="16dp">
+
+    <TextView
+        android:text="Home Page"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:text="Menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="140dp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnMateriOop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MATERI OOP"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#5469D4"
+        android:layout_marginBottom="12dp"
+        android:paddingVertical="14dp"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+
+    <Button
+        android:id="@+id/btnMateriAndroid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MATERI ANDROID"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#5469D4"
+        android:paddingVertical="14dp"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+
+</LinearLayout>
