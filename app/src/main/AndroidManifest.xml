@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ContactApp">
         <activity
+            android:name=".ContactActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false" />
         <activity

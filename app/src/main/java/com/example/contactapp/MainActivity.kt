@@ -28,6 +28,10 @@ class MainActivity : AppCompatActivity() {
                 prefManager.clear()
                 finish()
             }
+            btnToContact.setOnClickListener {
+                startActivity(Intent(this@MainActivity, ContactActivity::class.java))
+                finish()
+            }
         }
     }
     fun checkLoginStatus() {
