@@ -13,19 +13,21 @@
         android:id="@+id/edt_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:hint="Username" />
     <EditText
         android:id="@+id/edt_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
+        android:layout_marginTop="16dp"
         android:inputType="textPassword" />
-
     <EditText
         android:id="@+id/edt_password_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Re-type Password"
+        android:layout_marginTop="16dp"
         android:inputType="textPassword" />
     <Button
         android:id="@+id/btn_register"
@@ -37,5 +39,6 @@
         android:id="@+id/txt_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Sudah punya akun? Login disini." />
 </LinearLayout>

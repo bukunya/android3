@@ -3,10 +3,7 @@ package com.example.contactapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.contactapp.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
@@ -63,7 +60,7 @@ class RegisterActivity : AppCompatActivity() {
 
                 Toast.LENGTH_SHORT).show()
 
-            startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
+            startActivity(Intent(this@RegisterActivity, ProfileActivity::class.java))
             finish()
         } else {
             Toast.makeText(this@RegisterActivity, "Registrasi gagal",

@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ContactApp">
         <activity
-            android:name=".ContactActivity"
+            android:name=".ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
