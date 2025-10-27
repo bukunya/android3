@@ -15,8 +15,33 @@ android:layout_height="match_parent">
     app:title="Contact List"
     app:titleTextColor="@android:color/white" />
 
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/rv_contact"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewContacts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnTambahKontak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tambah Kontak"
+            android:layout_marginStart="8dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+
+
+    </LinearLayout>
 </LinearLayout>
