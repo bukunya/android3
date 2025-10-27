@@ -1,59 +1,66 @@
 package com.example.contactapp
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import com.example.contactapp.databinding.ActivityContactBinding
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class ContactActivity : AppCompatActivity() {
-    lateinit var binding: ActivityContactBinding
+
+    private lateinit var prefManager: PrefManager
+    private lateinit var adapter: ContactAdapter
+    private lateinit var contactList: MutableList<Contact>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        setContentView(R.layout.activity_contact)
 
-        binding = ActivityContactBinding.inflate(layoutInflater)
+        prefManager = PrefManager.getInstance(this)
+        contactList = prefManager.getAllContacts()
 
-        setContentView(binding.root)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewContacts)
+        val btnTambah = findViewById<Button>(R.id.btnTambahKontak)
+        val btnKembali = findViewById<Button>(R.id.btnKembali)
 
-        //panggil fungsi generate dummydata
-        var disaster = generateDummy()
+        adapter = ContactAdapter(this, contactList, prefManager)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
 
-        //init adapter
-        val adapterContact = ContactAdapter(generateDummy()) { contact ->
-            Toast.makeText(
-                this@ContactActivity,
-                "You clicked on ${contact.name}",
-                Toast.LENGTH_SHORT
-            ).show()
+        btnTambah.setOnClickListener {
+            showAddContactDialog()
         }
 
-        with(binding){
-            rvContact.apply {
-                adapter = adapterContact
-                layoutManager = GridLayoutManager(this@ContactActivity, 1)
-            }
-            btnReturnToMain.setOnClickListener {
-                startActivity(Intent(this@ContactActivity, MainActivity::class.java))
-                finish()
-            }
-
+        btnKembali.setOnClickListener {
+            finish()
         }
     }
 
-    fun generateDummy(): List<Contact>{
-        return listOf(
-            Contact(name = "Supri", "supri@mail.com", "1234567890"),
-            Contact(name = "Yanto", "yanto@mail.com", "0987654321"),
-            Contact(name = "Gunawan", "gunawan@mail.com", "1133557799"),
-            Contact(name = "Sunardi", "sunardi@mail.com", "2244668800"),
-            Contact(name = "Eko", "eko@mail.com", "1324576890"),
-            Contact(name = "Mulyono", "jokowi@mail.com", "6769420000")
-        )
+    private fun showAddContactDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_contact, null)
+        val etName = view.findViewById<EditText>(R.id.etName)
+        val etEmail = view.findViewById<EditText>(R.id.etEmail)
+        val etPhone = view.findViewById<EditText>(R.id.etPhone)
+
+        AlertDialog.Builder(this)
+            .setTitle("Tambah Kontak")
+            .setView(view)
+            .setPositiveButton("Simpan") { _, _ ->
+                val name = etName.text.toString()
+                val email = etEmail.text.toString()
+                val phone = etPhone.text.toString()
+
+                if (name.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty()) {
+                    prefManager.saveContact(name, email, phone)
+                    contactList = prefManager.getAllContacts()
+                    adapter = ContactAdapter(this, contactList, prefManager)
+                    findViewById<RecyclerView>(R.id.recyclerViewContacts).adapter = adapter
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 }
