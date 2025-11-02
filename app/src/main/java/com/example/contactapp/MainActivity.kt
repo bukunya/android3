@@ -2,27 +2,31 @@ package com.example.contactapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.contactapp.data.AppDatabase
+import com.example.contactapp.data.Contact // Make sure this is your new Contact data class
 import com.example.contactapp.databinding.ActivityMainBinding
+import com.example.contactapp.databinding.DialogAddEditContactBinding // <-- IMPORT THIS
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefManager: PrefManager
     private lateinit var adapter: ContactAdapter
-    private lateinit var contactList: MutableList<Contact>
+
+    // DAO
+    private val contactDao by lazy { AppDatabase.get(this).contactDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,19 +44,22 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         prefManager = PrefManager.getInstance(this)
-        contactList = prefManager.getAllContacts()
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewContacts)
-
-        adapter = ContactAdapter(this, contactList, prefManager)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        adapter = ContactAdapter(
+            onEdit = { contact ->
+                showEditContactDialog(contact)
+            },
+            onDelete = { contact ->
+                showDeleteConfirmationDialog(contact)
+            }
+        )
 
         checkLoginStatus()
 
         with(binding) {
             recyclerViewContacts.apply {
-                layoutManager = GridLayoutManager(this@MainActivity, 1)
+                layoutManager = LinearLayoutManager(this@MainActivity)
+                adapter = this@MainActivity.adapter // Set the adapter instance
             }
 
             btnTambahKontak.setOnClickListener {
@@ -85,27 +92,98 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAddContactDialog() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_contact, null)
-        val etName = view.findViewById<EditText>(R.id.etName)
-        val etEmail = view.findViewById<EditText>(R.id.etEmail)
-        val etPhone = view.findViewById<EditText>(R.id.etPhone)
+        val dialogBinding = DialogAddEditContactBinding.inflate(layoutInflater)
 
         AlertDialog.Builder(this)
             .setTitle("Tambah Kontak")
-            .setView(view)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = etName.text.toString()
-                val email = etEmail.text.toString()
-                val phone = etPhone.text.toString()
+            .setView(dialogBinding.root)
+            .setPositiveButton("Simpan") { dialog, _ ->
+                val name = dialogBinding.etName.text.toString().trim()
+                val email = dialogBinding.etEmail.text.toString().trim()
+                val phone = dialogBinding.etPhone.text.toString().trim()
 
                 if (name.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty()) {
-                    prefManager.saveContact(name, email, phone)
-                    val contactList = prefManager.getAllContacts()
-                    val adapter = ContactAdapter(this, contactList, prefManager)
-                    findViewById<RecyclerView>(R.id.recyclerViewContacts).adapter = adapter
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        contactDao.insert(Contact(name = name, email = email, phone = phone))
+
+                        withContext(Dispatchers.Main) {
+                            refreshList()
+                        }
+                    }
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Batal", null)
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
             .show()
+    }
+
+    private fun showEditContactDialog(contact: Contact) {
+        val dialogBinding = DialogAddEditContactBinding.inflate(layoutInflater)
+
+        // Pre-fill the fields with the contact's data
+        dialogBinding.etName.setText(contact.name)
+        dialogBinding.etEmail.setText(contact.email)
+        dialogBinding.etPhone.setText(contact.phone)
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit Kontak")
+            .setView(dialogBinding.root)
+            .setPositiveButton("Simpan") { dialog, _ ->
+                val name = dialogBinding.etName.text.toString().trim()
+                val email = dialogBinding.etEmail.text.toString().trim()
+                val phone = dialogBinding.etPhone.text.toString().trim()
+
+                if (name.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty()) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        contactDao.update(contact.copy(name = name, email = email, phone = phone))
+
+                        withContext(Dispatchers.Main) {
+                            refreshList()
+                        }
+                    }
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showDeleteConfirmationDialog(contact: Contact) {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus Kontak")
+            .setMessage("Yakin ingin menghapus ${contact.name}?")
+            .setPositiveButton("Hapus") { dialog, _ ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    contactDao.delete(contact)
+                    withContext(Dispatchers.Main) {
+                        refreshList()
+                    }
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshList()
+    }
+
+    private fun refreshList() {
+        lifecycleScope.launch {
+            val items = withContext(Dispatchers.IO) { contactDao.getAll() }
+            adapter.setItems(items)
+        }
     }
 }
