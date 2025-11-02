@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -48,4 +49,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Room
+    implementation(libs.room.runtime) // wajib
+    implementation(libs.room.ktx) // direkomendasikan utk Kotlin (suspend/Flow)
+    ksp(libs.room.compiler) // wajib: codegen DAO via KSP
+
+    // Coroutines
+    implementation(libs.coroutines.android)
 }
